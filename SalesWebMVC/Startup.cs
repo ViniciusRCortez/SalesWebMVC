@@ -15,6 +15,7 @@ using SalesWebMVC.Data;
 using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostingEnvironment;
 //using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 using Microsoft.Extensions.Options;
+using SalesWebMVC.Services;
 
 namespace SalesWebMvc
 {
@@ -46,6 +47,7 @@ namespace SalesWebMvc
                 builder.MigrationsAssembly("SalesWebMVC")));
 
             services.AddScoped<SeedingService>();
+            services.AddScoped<SellerServices>();
 
         }
 
