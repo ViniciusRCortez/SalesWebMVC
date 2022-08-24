@@ -101,11 +101,7 @@ namespace SalesWebMVC.Controllers
                 _sellerServices.Update(seller);
                 return RedirectToAction(nameof(Index));
             }
-            catch (NotFoundException e)
-            {
-                return RedirectToAction(nameof(Error), new { Message = e.Message });
-            }
-            catch (DbConcurrencyException e)
+            catch (ApplicationException e)
             {
                 return RedirectToAction(nameof(Error), new { Message = e.Message });
             }

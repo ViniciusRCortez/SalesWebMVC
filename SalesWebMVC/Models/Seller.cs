@@ -1,14 +1,35 @@
-﻿namespace SalesWebMVC.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SalesWebMVC.Models
 {
     public class Seller
     {
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "{0} is required")]
+        [StringLength(60, MinimumLength = 3,ErrorMessage = "{0} size should be between {2} and {1}")]
         public string Name { get; set; }
+
+        [Required(ErrorMessage = "{0} is required")]
+        [EmailAddress(ErrorMessage = "Insert a valid email")]
+        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
+
+        [Required(ErrorMessage = "{0} is required")]
+        [Display(Name = "Bith Date")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime Birthday { get; set; }
+
+        [Required(ErrorMessage = "{0} is required")]
+        [Range(100.0, 500.0, ErrorMessage = "{0} must be between {1} and {2}")]
+        [DisplayFormat(DataFormatString ="{0:F2}")]
         public double Salary { get; set; }
+
         public Department Department { get; set; }
+
         public int DepartmentId { get; set; }
+
         public ICollection<SalesRecord> Sales { get; set; } = new List<SalesRecord>();
 
         public Seller()
