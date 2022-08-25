@@ -1,26 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using SalesWebMVC.Models;
 using SalesWebMVC.Models.ViewModels;
 using SalesWebMVC.Services;
 using SalesWebMVC.Services.Exceptions;
-using System.Diagnostics;
+using SalesWebMVC.Models.ViewModels;
+using SalesWebMVC.Models;
+using SalesWebMVC.Services;
 
 namespace SalesWebMVC.Controllers
 {
     public class SellersController : Controller
     {
-        private readonly SellerServices _sellerServices;
+        private readonly SellerServices _sellerService;
         private readonly DepartmentService _departmentService;
 
-        public SellersController(SellerServices sellerServices, DepartmentService departmentService)
+        public SellersController(SellerServices sellerService, DepartmentService departmentService)
         {
-            _sellerServices = sellerServices;
+            _sellerService = sellerService;
             _departmentService = departmentService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var list = await _sellerServices.FindAllAsync();
+            var list = await _sellerService.FindAllAsync();
             return View(list);
         }
 
@@ -35,13 +42,13 @@ namespace SalesWebMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Seller seller)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 var departments = await _departmentService.FindAllAsync();
                 var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
                 return View(viewModel);
             }
-            await _sellerServices.InsertAsync(seller);
+            await _sellerService.InsertAsync(seller);
             return RedirectToAction(nameof(Index));
         }
 
@@ -49,84 +56,93 @@ namespace SalesWebMVC.Controllers
         {
             if (id == null)
             {
-                return RedirectToAction(nameof(Error), new { Message = "Id not provided" });
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
-            var obj = await _sellerServices.FindByIdAsync(id.Value);
+
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
             {
-                return RedirectToAction(nameof(Error), new { Message = "Id not found" });
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
+
             return View(obj);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
-        {           
-            await _sellerServices.RemoveAsync(id);
+        {
+            await _sellerService.RemoveAsync(id);
             return RedirectToAction(nameof(Index));
         }
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                return RedirectToAction(nameof(Error), new { Message = "Id not provided" });
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
-            var obj = await _sellerServices.FindByIdAsync(id.Value);
+
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
             {
-                return RedirectToAction(nameof(Error), new { Message = "Id not found" });
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
+
             return View(obj);
         }
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return RedirectToAction(nameof(Error), new { Message = "Id not provided" });
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
-            var obj = await _sellerServices.FindByIdAsync(id.Value);
+
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
             {
-                return RedirectToAction(nameof(Error), new { Message = "Id not found" });
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
-            var departments = await _departmentService.FindAllAsync();
-            var viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
+
+            List<Department> departments = await _departmentService.FindAllAsync();
+            SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
             return View(viewModel);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Seller seller)
         {
-            if (!ModelState.IsValid)
-            {                
+            if (ModelState.IsValid)
+            {
                 var departments = await _departmentService.FindAllAsync();
                 var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
                 return View(viewModel);
             }
             if (id != seller.Id)
             {
-                return RedirectToAction(nameof(Error), new { Message = "Id mismatch" });
+                return RedirectToAction(nameof(Error), new { message = "Id mismatch" });
             }
             try
             {
-               await _sellerServices.UpdateAsync(seller);
+                await _sellerService.UpdateAsync(seller);
                 return RedirectToAction(nameof(Index));
             }
             catch (ApplicationException e)
             {
-                return RedirectToAction(nameof(Error), new { Message = e.Message });
+                return RedirectToAction(nameof(Error), new { message = e.Message });
             }
         }
+
         public IActionResult Error(string message)
         {
-            var viewModel = new ErrorViewModel 
+            var viewModel = new ErrorViewModel
             {
                 Message = message,
                 RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
             };
             return View(viewModel);
         }
-
     }
 }

@@ -33,8 +33,7 @@ namespace SalesWebMVC.Services
 
         public async Task<Seller> FindByIdAsync(int id)
         {
-            Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Seller, Department> includableQueryable = _context.Seller.Include(obj => obj.Department);
-            return await includableQueryable.FirstOrDefaultAsync(obj => obj.Id == id);
+            return await _context.Seller.Include(obj => obj.Department).FirstOrDefaultAsync(obj => obj.Id == id);
         }
 
         public async Task RemoveAsync(int id)
